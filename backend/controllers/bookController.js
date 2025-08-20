@@ -1,5 +1,5 @@
 import Book from "../models/bookModel.js";
-
+import User from "../models/userModel.js";
 
 
 //@desc to see only one book
@@ -9,6 +9,7 @@ export const getOneBook = async (req, res) => {
     const { id } = req.params;
 
     try {
+        
         const book = await Book.findById(id);
 
         if (!book) {
@@ -34,7 +35,7 @@ export const getOneBook = async (req, res) => {
 //@access PRIVATE
 export const getBooks = async (req, res) => {
     try {
-        const books = await Book.find();
+        const books = await Book.find({ user: req.user.id });
 
         res.status(200).json({
             message: "Successfull",
@@ -66,7 +67,8 @@ export const createBook = async (req, res) => {
         const newBook = {
             title,
             author,
-            publishYear
+            publishYear,
+            user: req.user.id
         }
 
         const book = await Book.create(newBook);
@@ -116,6 +118,18 @@ export const updateBook = async (req, res) => {
             publishYear
         }
 
+        const user = await User.findById(req.user.id);
+
+        //check for user
+        if (!user) {
+            res.status(401).json({ message: 'User Not Found' })
+        }
+
+        //make sure the logged in User matches the goal user
+        if (book.user.toString() !== user.id) {
+            res.status(401).json({ message: 'User Not AUthorized!' })
+        };
+
         const updatedBook = await Book.findByIdAndUpdate(id, newBook);
 
         res.status(201).json({
@@ -146,6 +160,17 @@ export const deleteBook = async (req, res) => {
             })
         }
 
+        const user = await User.findById(req.user.id);
+
+        //check for user
+        if (!user) {
+            res.status(401).json({ message: 'User Not Found' })
+        }
+
+        //make sure the logged in User matches the goal user
+        if (book.user.toString() !== user.id) {
+            res.status(401).json({ message: 'User Not AUthorized!' })
+        };
         const deleteBook = await Book.findByIdAndDelete(id);
 
         res.status(200).json({
