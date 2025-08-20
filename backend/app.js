@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from 'dotenv'
 import bookRoutes from './routes/bookRoutes.js'
 import connectDB from "./config/db.js";
+import userRoutes from './routes/userRoutes.js'
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/book', bookRoutes)
+app.use('/users', userRoutes)
 
 connectDB(); 
 
